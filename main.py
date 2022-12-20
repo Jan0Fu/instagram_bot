@@ -1,43 +1,46 @@
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from time import sleep
+import random
 
 USERNAME = ""
 PASSWORD = ""
-FOLLOW_ACCOUNT = "chefsteps"
-URL = "https://www.instagram.com/accounts/login/"
-DRIVER_PATH = "/Users/jano/chromedriver"
+FOLLOW_ACCOUNT = "chefsteps/followers"
+URL = "https://www.instagram.com/"
+DRIVER_PATH = Service("/Users/jano/chromedriver")
+op = webdriver.ChromeOptions()
 
 
 class InstaFollower:
-    def __init__(self, driver_path):
-        self.driver = webdriver.Chrome(driver_path)
+    def __init__(self, driver_path, op):
+        self.driver = webdriver.Chrome(service=driver_path, options=op)
 
     def login(self):
         self.driver.get(URL)
-        sleep(3)
-        user_field = self.driver.find_element(By.CSS_SELECTOR, "._ab3a input")
-        user_field.send_keys(USERNAME)
-        sleep(5)
-        password_field = self.driver.find_element(By.XPATH, '//*[@id="loginForm"]/div/div[2]/div/label/input')
-        password_field.send_keys(PASSWORD)
-        sleep(3)
-        password_field.send_keys(Keys.ENTER)
-        sleep(5)
-        save_info = self.driver.find_element(By.CSS_SELECTOR, '._ac8f button')
-        save_info.click()
-        sleep(3)
-        turn_notification = self.driver.find_element(By.CSS_SELECTOR, '._a9-z button')
-        turn_notification.click()
-        sleep(3)
+        sleep(2)
+        self.driver.find_element(By.NAME, "username").send_keys(USERNAME)
+        self.driver.find_element(By.NAME, "password").send_keys(PASSWORD)
+        self.driver.find_element(By.ID, "loginForm").click()
 
     def find_followers(self):
-        pass
+        sleep(5)
+        self.driver.get(URL + FOLLOW_ACCOUNT)
+        sleep(4)
 
     def follow(self):
-        pass
+        try:
+            list_of_followers = self.driver.find_elements(By.CSS_SELECTOR, 'button')
+            for item in list_of_followers:
+                if item.text == "Follow":
+                    item.click()
+                    sleep(random.randint(5, 10))
+        except Exception as e:
+            print(e)
 
 
-InstaBot = InstaFollower(DRIVER_PATH)
-InstaBot.login()
+instaBot = InstaFollower(DRIVER_PATH, op)
+instaBot.login()
+instaBot.find_followers()
+instaBot.follow()
